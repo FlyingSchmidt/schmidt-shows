@@ -253,6 +253,46 @@
   .char-counter.warn  { color: #c8772a; }
   .char-counter.limit { color: var(--red, #c45c4a); font-weight: 600; }
 
+  /* EXPANDABLE CARD DETAIL */
+  .item-card { cursor: pointer; }
+  .item-card .card-actions { cursor: default; }
+  .card-detail {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card-detail.open { display: flex; }
+  .card-detail-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .card-detail-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin-bottom: 2px;
+  }
+  .card-detail-section { display: flex; flex-direction: column; gap: 2px; }
+  .card-detail-value { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .card-detail-stars { color: var(--accent); font-size: 14px; letter-spacing: 1px; }
+  .card-expand-hint {
+    font-size: 10px;
+    color: var(--text3);
+    text-align: right;
+    margin-top: 4px;
+    transition: color 0.15s;
+  }
+  .item-card:hover .card-expand-hint { color: var(--text2); }
+  .item-card.expanded { border-color: var(--border2); }
+
   /* DUPLICATE WARNING */
   .dupe-warning {
     font-size: 12px;
@@ -7926,6 +7966,86 @@ function renderStats() {
 }
 
 // ── LIBRARY ───────────────────────────────────────────────────────────────────
+function toggleCard(id, event) {
+  // Don't expand if clicking a button or interactive element
+  if (event.target.closest('button, input, textarea, select, .star, .season-pill, .watch-panel, .edit-panel, .season-edit-panel, .season-rate-panel')) return;
+  const card = document.getElementById('card-'+id);
+  const detail = document.getElementById('cd-'+id);
+  if (!card || !detail) return;
+  const isOpen = detail.classList.contains('open');
+  // Close all other expanded cards
+  document.querySelectorAll('.card-detail.open').forEach(d => {
+    d.classList.remove('open');
+    d.closest('.item-card')?.classList.remove('expanded');
+  });
+  if (!isOpen) {
+    detail.classList.add('open');
+    card.classList.add('expanded');
+  }
+}
+
+function buildCardDetail(item) {
+  const statusLabels = {watched:'Watched', want:'Want to watch', upcoming:'Upcoming', watching:'Watching', dnf:"Didn't Finish"};
+  const ratingStr = item.rating > 1 ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : null;
+  const where = [item.theaters?'🎬 Theaters':'', item.service?'📺 '+item.service:''].filter(Boolean).join(' + ');
+  const rel = item.releaseDate ? fmtDate(item.releaseDate) : null;
+  const watched = item.seasonsWatched || [];
+  const ratings = item.seasonRatings || {};
+  const notes   = item.seasonNotes   || {};
+
+  let sections = '';
+
+  // Rating + review
+  if (item.status === 'watched' && ratingStr) {
+    sections += `<div class="card-detail-section">
+      <div class="card-detail-label">Our Rating</div>
+      <div class="card-detail-stars">${ratingStr}</div>
+    </div>`;
+  }
+
+  if (item.notes) {
+    sections += `<div class="card-detail-section">
+      <div class="card-detail-label">${item.status==='dnf'?"Why We Stopped":"Review"}</div>
+      <div class="card-detail-value">${esc(item.notes)}</div>
+    </div>`;
+  }
+
+  // Where to watch + release date
+  let metaLine = '';
+  if (where) metaLine += `<div class="card-detail-section"><div class="card-detail-label">Where to Watch</div><div class="card-detail-value">${esc(where)}</div></div>`;
+  if (rel)   metaLine += `<div class="card-detail-section"><div class="card-detail-label">Release Date</div><div class="card-detail-value">${esc(rel.formatted)}</div></div>`;
+  if (metaLine) sections += `<div class="card-detail-row">${metaLine}</div>`;
+
+  // Season breakdown for shows
+  if (item.type === 'show' && item.totalSeasons) {
+    const seasonLines = Array.from({length: item.totalSeasons}, (_,i) => {
+      const s = i+1;
+      const r = ratings[s];
+      const n = notes[s];
+      const isDnf = r === 'dnf';
+      const isWatched = watched.includes(s);
+      if (!isWatched && !r && !n) return null;
+      const starsStr = isDnf ? '<span style="color:var(--red,#c45c4a);font-size:11px;font-weight:600;">DNF</span>'
+        : (r > 0 ? `<span class="card-detail-stars" style="font-size:12px;">${'★'.repeat(r)}${'☆'.repeat(5-r)}</span>` : '');
+      const noteStr = n ? `<span style="color:var(--text2);margin-left:6px;">${esc(n)}</span>` : '';
+      return `<div style="font-size:12px;margin-bottom:3px;"><span style="color:var(--accent);font-weight:600;min-width:24px;display:inline-block;">S${s}</span>${starsStr}${noteStr}</div>`;
+    }).filter(Boolean);
+
+    if (seasonLines.length) {
+      sections += `<div class="card-detail-section">
+        <div class="card-detail-label">Season Breakdown</div>
+        ${seasonLines.join('')}
+      </div>`;
+    }
+  }
+
+  if (!sections) return '';
+
+  return `<div class="card-detail" id="cd-${item.id}">
+    ${sections}
+  </div>`;
+}
+
 function buildWatchedBtn(item) {
   // Already fully resolved statuses — no button needed
   if (item.status === 'watched') return '';
@@ -8063,7 +8183,8 @@ function renderLibrary() {
     const editPanel  = isGuest ? '' : buildEditPanel(item);
     const seasonInfo = item.type==='show' ? buildSeasonInfo(item, isGuest) : '';
 
-    const card = `<div class="item-card${isSoon?' soon':''}${isDisliked?' disliked':''}" id="card-${item.id}" data-status="${item.status}">
+    const cardDetail = buildCardDetail(item);
+    const card = `<div class="item-card${isSoon?' soon':''}${isDisliked?' disliked':''}" id="card-${item.id}" data-status="${item.status}" onclick="toggleCard(${item.id}, event)">
       <div class="item-info" style="flex:1;min-width:0;">
         <div class="item-title">${esc(item.title)}</div>
         <div class="item-meta">
@@ -8077,13 +8198,16 @@ function renderLibrary() {
         ${item.notes?`<div style="font-size:12px;color:var(--text3);margin-top:5px;">${esc(item.notes)}</div>`:''}
         ${item.type==='show' ? buildShowSeasonNote(item) : ''}
         ${seasonInfo}
+        ${cardDetail}
         ${watchPanel}
         ${editPanel}
       </div>
-      ${stars}
-      ${markWatchedBtn}
-      ${editBtn}
-      ${deleteBtn}
+      <div class="card-actions" style="display:flex;align-items:center;gap:6px;flex-shrink:0;" onclick="event.stopPropagation()">
+        ${stars}
+        ${markWatchedBtn}
+        ${editBtn}
+        ${deleteBtn}
+      </div>
     </div>`;
     return header + card;
   }).join('');
