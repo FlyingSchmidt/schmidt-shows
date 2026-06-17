@@ -9,17 +9,6 @@
 
   :root {
     --bg: #0f0f0f;
-    --surface: #1a1a1a;<!DOCTYPE html>
-<!-- saved from url=(0036)https://theschmidtshows.netlify.app/ -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schmidt Shows</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-  :root {
-    --bg: #0f0f0f;
     --surface: #1a1a1a;
     --surface2: #222222;
     --border: #2e2e2e;
@@ -700,7 +689,7 @@
   }
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></script></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></script></script></script>
 </head>
 <body>
 
@@ -7823,6 +7812,8 @@ async function loadItems() {
 
 // ── REALTIME SUBSCRIPTION ─────────────────────────────────────────────────────
 function subscribeRealtime() {
+  if (window._realtimeSubscribed) return;
+  window._realtimeSubscribed = true;
   sb.channel('items-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
       loadItems();
