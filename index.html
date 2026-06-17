@@ -374,6 +374,10 @@
 
   html.guest-mode .dupe-scan-btn,
   body.guest-mode .dupe-scan-btn,
+  html.guest-mode [data-tab="upcoming"],
+  body.guest-mode [data-tab="upcoming"],
+  html.guest-mode .pick-month-section,
+  body.guest-mode .pick-month-section,
   html.guest-mode .btn-mark-watched,
   body.guest-mode .btn-mark-watched,
   body.guest-mode .btn-edit,
@@ -8204,7 +8208,7 @@ function renderLibrary() {
       </div>` : '';
     const editBtn    = isGuest ? '' : `<button class="btn-edit" onclick="openEditPanel(${item.id})">Edit</button>`;
     const deleteBtn  = isGuest ? '' : `<button class="icon-btn" onclick="deleteItem(${item.id})" title="Remove">✕</button>`;
-    const editPanel  = isGuest ? '' : buildEditPanel(item);
+    const editPanel  = isGuest ? '' : buildEditPanel(item, isGuest);
     const seasonInfo = item.type==='show' ? buildSeasonInfo(item, isGuest) : '';
 
     const cardDetail = buildCardDetail(item);
@@ -8658,7 +8662,7 @@ function autoUpdateShowStatus(item) {
 }
 
 // ── EDIT PANEL ────────────────────────────────────────────────────────────────
-function buildEditPanel(item) {
+function buildEditPanel(item, isGuest) {
   const isWatched = item.status === 'watched';
   const services = ['Netflix','HBO Max','Hulu','Disney+','Apple TV+','Prime Video','Peacock','Paramount+','Fandango at Home'];
   const statuses = ['want','upcoming','watching','watched','dnf'];
@@ -8700,18 +8704,17 @@ function buildEditPanel(item) {
       <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Why didn't you finish it?</label>
       <textarea id="en-dnf-${item.id}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:none;min-height:60px;" placeholder="Add a note about why you stopped…" maxlength="280" oninput="charCounter(this,280)">${esc(item.notes||'')}</textarea>
     </div>
-    ${!isGuest ? `
-    <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px;">
+    <div class="pick-month-section" style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px;">
       <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:6px;">Pick of the Month</div>
       <div style="display:flex;gap:8px;">
-        <button onclick="setPickOfMonth('shane',${item.id})" style="flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid ${item.isShanePick?'#c8a96e':'var(--border2)'};background:${item.isShanePick?'rgba(200,169,110,0.12)':'none'};color:${item.isShanePick?'#c8a96e':'var(--text2)'};cursor:pointer;font-weight:${item.isShanePick?'600':'400'};">
+        <button onclick="setPickOfMonth('shane',${item.id})" style="flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid ${item.isShanePick?'#c8a96e':'var(--border2)'};background:${item.isShanePick?'rgba(200,169,110,0.12)':'none'};color:${item.isShanePick?'#c8a96e':'var(--text2)'};cursor:pointer;">
           🏆 ${item.isShanePick?'✓ Shane\'s Pick':'Shane\'s Pick'}
         </button>
-        <button onclick="setPickOfMonth('leigh',${item.id})" style="flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid ${item.isLeighPick?'#c8a96e':'var(--border2)'};background:${item.isLeighPick?'rgba(200,169,110,0.12)':'none'};color:${item.isLeighPick?'#c8a96e':'var(--text2)'};cursor:pointer;font-weight:${item.isLeighPick?'600':'400'};">
+        <button onclick="setPickOfMonth('leigh',${item.id})" style="flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid ${item.isLeighPick?'#c8a96e':'var(--border2)'};background:${item.isLeighPick?'rgba(200,169,110,0.12)':'none'};color:${item.isLeighPick?'#c8a96e':'var(--text2)'};cursor:pointer;">
           🏆 ${item.isLeighPick?'✓ Leigh\'s Pick':'Leigh\'s Pick'}
         </button>
       </div>
-    </div>` : ''}
+    </div>
     <div style="display:flex;gap:8px;margin-top:8px;">
       <button class="edit-save" onclick="saveEdit(${item.id})">Save</button>
       <button class="edit-cancel" onclick="closeEditPanel(${item.id})">Cancel</button>
