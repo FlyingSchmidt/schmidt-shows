@@ -9973,6 +9973,7 @@ function itemToDb(item) {
     season_ratings:   item.seasonRatings ? JSON.stringify(item.seasonRatings) : '{}',
     season_notes:     item.seasonNotes   ? JSON.stringify(item.seasonNotes)   : '{}',
     eps_per_season:   item.epsPerSeason  || null,
+    watched_date:     item.watchedDate   || null,
     is_shanes_pick:   item.isShanePick   || false,
     is_leighs_pick:   item.isLeighPick   || false,
   };
@@ -9996,6 +9997,7 @@ function dbToItem(row) {
     seasonRatings:  row.season_ratings  ? JSON.parse(row.season_ratings)  : {},
     seasonNotes:    row.season_notes    ? JSON.parse(row.season_notes)    : {},
     epsPerSeason:   row.eps_per_season  || null,
+    watchedDate:    row.watched_date    || null,
     isShanePick:    row.is_shanes_pick  || false,
     isLeighPick:    row.is_leighs_pick  || false,
   };
@@ -10133,6 +10135,10 @@ function buildCardDetail(item) {
   let metaLine = '';
   if (where) metaLine += `<div class="card-detail-section"><div class="card-detail-label">Where to Watch</div><div class="card-detail-value">${esc(where)}</div></div>`;
   if (rel)   metaLine += `<div class="card-detail-section"><div class="card-detail-label">Release Date</div><div class="card-detail-value">${esc(rel.formatted)}</div></div>`;
+  if (item.watchedDate) {
+    const wd = new Date(item.watchedDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    metaLine += `<div class="card-detail-section"><div class="card-detail-label">Watched</div><div class="card-detail-value">${wd}</div></div>`;
+  }
   if (metaLine) sections += `<div class="card-detail-row">${metaLine}</div>`;
 
   // Season breakdown for shows
@@ -10246,12 +10252,13 @@ function renderLibrary() {
   if (fSort === 'smart') {
     // Picks of the Month gets its own group (order 3 = after want, before watched)
     const smartGroup = (item) => {
-      if (item.status === 'watching')  return 0;
-      if (item.status === 'upcoming')  return 1;
-      if (item.status === 'want')      return 2;
-      if (item.isShanePick || item.isLeighPick) return 3; // Picks of the Month
-      if (item.status === 'watched')   return 4;
-      if (item.status === 'dnf')       return 5;
+      if (item.status === 'watching')                                          return 0;
+      if (item.status === 'upcoming')                                          return 1;
+      if (item.status === 'want')                                              return 2;
+      if (item.isShanePick || item.isLeighPick)                                return 3; // Picks of the Month
+      if (item.status === 'watched' && (!item.rating || item.rating === 0))    return 4; // needs rating
+      if (item.status === 'watched')                                           return 5;
+      if (item.status === 'dnf')                                               return 6;
       return 9;
     };
     list.sort((a, b) => {
@@ -10302,11 +10309,12 @@ function renderLibrary() {
     if (item.status === 'upcoming')  return 'upcoming';
     if (item.status === 'want')      return 'want';
     if (item.isShanePick || item.isLeighPick) return 'pick';
+    if (item.status === 'watched' && (!item.rating || item.rating === 0)) return 'rate-these';
     if (item.status === 'watched')   return 'watched';
     if (item.status === 'dnf')       return 'dnf';
     return item.status;
   };
-  const allGroupLabels = {watching:'Watching', upcoming:'Upcoming', want:'Want to Watch', pick:'🏆 Picks of the Month', watched:'Watched', dnf:"Didn't Finish"};
+  const allGroupLabels = {watching:'Watching', upcoming:'Upcoming', want:'Want to Watch', pick:'🏆 Picks of the Month', 'rate-these':'⭐ Rate These', watched:'Watched', dnf:"Didn't Finish"};
   let lastGroup = null;
   el.innerHTML = list.map(item => {
     let header = '';
@@ -10326,7 +10334,7 @@ function renderLibrary() {
     const stars = item.status==='watched'
       ? `<div class="stars">${[1,2,3,4,5].map(n=>`<span class="star${item.rating>=n?' filled':''}" onclick="setRating(${item.id},${n})">★</span>`).join('')}</div>` : '';
     const markWatchedBtn = isGuest ? '' : buildWatchedBtn(item);
-    const watchPanel = (!isGuest && item.status!=='watched' && item.status!=='dnf') ? `
+    const watchPanel = (!isGuest && (item.status!=='watched' || item.rating===0) && item.status!=='dnf') ? `
       <div class="watch-panel" id="wp-${item.id}">
         <span class="watch-panel-label">Rate it:</span>
         <div class="watch-stars" id="ws-${item.id}">
@@ -10449,6 +10457,7 @@ async function confirmWatched(id) {
   if (!item) return;
   item.status = 'watched';
   item.rating = rating;
+  if (!item.watchedDate) item.watchedDate = new Date().toISOString().split('T')[0];
   const notesEl = document.getElementById('wn-'+id);
   if (notesEl && notesEl.value.trim()) item.notes = notesEl.value.trim();
   if (window._watchRatings) delete window._watchRatings[id];
