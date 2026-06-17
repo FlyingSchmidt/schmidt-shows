@@ -8552,7 +8552,7 @@ function buildEditPanel(item) {
       <label>Service</label>
       <select id="esvc-${item.id}"><option value="">—</option>${serviceOpts}</select>
     </div>`}
-    ${isWatched ? `
+    ${isWatched && item.status!=='dnf' ? `
     <div class="edit-row">
       <label>Rating</label>
       <div style="display:flex;gap:4px;" id="er-${item.id}">
@@ -8600,9 +8600,14 @@ function onEditStatusChange(id) {
   const sel = document.getElementById('es-'+id);
   if (!sel) return;
   const status = sel.value;
-  // Show DNF notes if DNF selected and not already watched (watched has its own notes)
+  // Show DNF notes field when DNF selected
   const dnfWrap = document.getElementById('ednf-'+id);
   if (dnfWrap) dnfWrap.style.display = status==='dnf' ? 'flex' : 'none';
+  // Hide rating and standard notes when DNF selected
+  const ratingRow = document.getElementById('er-'+id)?.closest('.edit-row');
+  const notesRow  = document.getElementById('en-'+id)?.closest('.edit-row');
+  if (ratingRow) ratingRow.style.display = status==='dnf' ? 'none' : '';
+  if (notesRow)  notesRow.style.display  = status==='dnf' ? 'none' : '';
 }
 
 async function saveEdit(id) {
