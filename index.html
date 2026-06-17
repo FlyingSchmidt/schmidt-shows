@@ -8539,7 +8539,7 @@ function buildEditPanel(item) {
     </div>
     <div class="edit-row">
       <label>Status</label>
-      <select id="es-${item.id}">${statusOpts}</select>
+      <select id="es-${item.id}" onchange="onEditStatusChange(${item.id})">${statusOpts}</select>
       <label>Release Date</label>
       <input type="date" id="ed-${item.id}" value="${item.releaseDate||''}" />
     </div>
@@ -8563,6 +8563,10 @@ function buildEditPanel(item) {
       <label>Notes / Review</label>
       <textarea id="en-${item.id}">${esc(item.notes||'')}</textarea>
     </div>` : ''}
+    <div id="ednf-${item.id}" style="display:${item.status==='dnf'?'flex':'none'};flex-direction:column;gap:5px;margin-top:4px;">
+      <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Why didn't you finish it?</label>
+      <textarea id="en-dnf-${item.id}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:none;min-height:60px;" placeholder="Add a note about why you stopped…">${esc(item.notes||'')}</textarea>
+    </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(${item.id})">Save</button>
       <button class="edit-cancel" onclick="closeEditPanel(${item.id})">Cancel</button>
@@ -8592,6 +8596,15 @@ function setEditRatingStar(id, r) {
   }
 }
 
+function onEditStatusChange(id) {
+  const sel = document.getElementById('es-'+id);
+  if (!sel) return;
+  const status = sel.value;
+  // Show DNF notes if DNF selected and not already watched (watched has its own notes)
+  const dnfWrap = document.getElementById('ednf-'+id);
+  if (dnfWrap) dnfWrap.style.display = status==='dnf' ? 'flex' : 'none';
+}
+
 async function saveEdit(id) {
   const item = items.find(i => i.id===id);
   if (!item) return;
@@ -8609,6 +8622,10 @@ async function saveEdit(id) {
     }
     const notesEl = document.getElementById('en-'+id);
     if (notesEl) item.notes = notesEl.value.trim();
+  }
+  if (item.status==='dnf') {
+    const dnfNotesEl = document.getElementById('en-dnf-'+id);
+    if (dnfNotesEl) item.notes = dnfNotesEl.value.trim();
   }
   await upsertItem(item);
   renderLibrary();
