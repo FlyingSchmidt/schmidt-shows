@@ -241,6 +241,49 @@
 
   /* WATCHING badge */
   .b-watching { background: #2a1e35; color: #c090e0; }
+
+  /* DUPLICATE WARNING */
+  .dupe-warning {
+    font-size: 12px;
+    color: #c8772a;
+    background: #2e1e10;
+    border: 1px solid #5a3418;
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    margin-top: 4px;
+    display: none;
+  }
+  .dupe-warning.show { display: block; }
+  .dupe-scan-btn {
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .dupe-scan-btn:hover { border-color: var(--accent2); color: var(--accent); }
+  .dupe-result {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .dupe-item {
+    background: var(--surface);
+    border: 1px solid #5a3418;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .dupe-item-title { font-weight: 500; color: var(--accent); margin-bottom: 4px; }
+  .dupe-item-copies { color: var(--text2); font-size: 12px; }
   /* GUEST MODE — hide all edit controls via CSS */
   html.guest-mode .b-want,
   html.guest-mode .b-upcoming,
@@ -742,6 +785,10 @@
   <!-- LIBRARY -->
   <div id="tab-library" class="section active">
 
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button class="dupe-scan-btn" onclick="scanDuplicates()">🔍 Scan for Duplicates</button>
+    </div>
+    <div id="dupe-scan-results"></div>
     <div class="search-wrap">
       <input class="search-input" type="text" id="search-input" placeholder="Search titles…" oninput="renderLibrary()">
     </div>
@@ -7610,7 +7657,8 @@ Dubbed... not interesting">S1</span>
       <div class="form-row">
         <div class="form-group full">
           <label>Title *</label>
-          <input type="text" id="a-title" placeholder="e.g. Oppenheimer">
+          <input type="text" id="a-title" placeholder="e.g. Oppenheimer" oninput="checkDuplicate()">
+          <div class="dupe-warning" id="dupe-warning"></div>
         </div>
       </div>
       <div class="form-row">
@@ -8210,6 +8258,10 @@ async function setRating(id, r) {
 }
 
 async function deleteItem(id) {
+  const item = items.find(i => i.id===id);
+  if (!item) return;
+  const confirmed = window.confirm(`Are you sure you want to delete "${item.title}"?`);
+  if (!confirmed) return;
   items = items.filter(i=>i.id!==id);
   await removeItem(id);
   renderLibrary();
@@ -8649,6 +8701,59 @@ function onTypeChange() {
 }
 
 function onStatusChange() {}
+
+// ── DUPLICATE DETECTION ───────────────────────────────────────────────────────
+function checkDuplicate() {
+  const titleEl = document.getElementById('a-title');
+  const warnEl  = document.getElementById('dupe-warning');
+  if (!titleEl || !warnEl) return;
+  const val = titleEl.value.trim().toLowerCase();
+  if (!val || val.length < 2) { warnEl.classList.remove('show'); return; }
+  const matches = items.filter(i => i.title.toLowerCase() === val);
+  if (matches.length > 0) {
+    const names = matches.map(i => `"${i.title}" (${i.status})`).join(', ');
+    warnEl.textContent = `⚠ Already in your library: ${names}`;
+    warnEl.classList.add('show');
+  } else {
+    warnEl.classList.remove('show');
+  }
+}
+
+function scanDuplicates() {
+  const el = document.getElementById('dupe-scan-results');
+  if (!el) return;
+
+  // Group items by normalized title
+  const groups = {};
+  items.forEach(item => {
+    const key = item.title.toLowerCase().trim();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+  });
+
+  const dupes = Object.values(groups).filter(g => g.length > 1);
+
+  if (!dupes.length) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--green);padding:8px 4px;margin-bottom:8px;">✓ No duplicates found!</div>`;
+    setTimeout(() => { el.innerHTML = ''; }, 3000);
+    return;
+  }
+
+  const statusLabels = {watched:'Watched', want:'Want to watch', upcoming:'Upcoming', watching:'Watching', dnf:"Didn't Finish"};
+  el.innerHTML = `<div style="font-size:12px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">${dupes.length} duplicate${dupes.length!==1?'s':''} found</div>
+    <div class="dupe-result">
+      ${dupes.map(group => `
+        <div class="dupe-item">
+          <div class="dupe-item-title">${esc(group[0].title)}</div>
+          <div class="dupe-item-copies">${group.map(i =>
+            `<span style="margin-right:10px;">${statusLabels[i.status]||i.status}${i.service?' · '+i.service:''} <button onclick="deleteItem(${i.id})" style="font-size:11px;background:none;border:1px solid var(--red);border-radius:4px;color:var(--red);padding:1px 6px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:4px;">Delete</button></span>`
+          ).join('')}</div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:8px;">
+      <button onclick="document.getElementById('dupe-scan-results').innerHTML=''" style="font-size:11px;background:none;border:none;color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;">Dismiss</button>
+    </div>`;
+}
 
 function toggleChip(which) {
   if (which==='theater') {
