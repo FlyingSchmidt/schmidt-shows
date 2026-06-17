@@ -254,6 +254,16 @@
   .char-counter.limit { color: var(--red, #c45c4a); font-weight: 600; }
 
   /* PICK OF THE MONTH */
+  @keyframes pickShimmer {
+    0%   { border-left-color: rgba(200,169,110,0.25); }
+    50%  { border-left-color: rgba(200,169,110,1); }
+    100% { border-left-color: rgba(200,169,110,0.25); }
+  }
+  .item-card.is-pick {
+    border-left: 3px solid rgba(200,169,110,0.25);
+    animation: pickShimmer 2.5s ease-in-out infinite;
+  }
+
   .pick-ribbon {
     display: inline-flex;
     align-items: center;
@@ -8137,10 +8147,20 @@ function renderLibrary() {
 
   // Sort
   if (fSort === 'smart') {
-    const statusOrder = { watching: 0, upcoming: 1, want: 2, watched: 3, dnf: 4 };
+    // Pick of the Month gets its own group (order 3 = after want, before watched)
+    const smartGroup = (item) => {
+      if (item.status === 'watching')  return 0;
+      if (item.status === 'upcoming')  return 1;
+      if (item.status === 'want')      return 2;
+      if (item.isShanePick || item.isLeighPick) return 3; // pick of the month
+      if (item.status === 'watched')   return 4;
+      if (item.status === 'dnf')       return 5;
+      return 9;
+    };
     list.sort((a, b) => {
-      const so = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
-      if (so !== 0) return so;
+      const ga = smartGroup(a);
+      const gb = smartGroup(b);
+      if (ga !== gb) return ga - gb;
       if (a.status === 'watching') {
         const aWatched = (a.seasonsWatched||[]).length;
         const bWatched = (b.seasonsWatched||[]).length;
@@ -8153,6 +8173,7 @@ function renderLibrary() {
         return a.title.localeCompare(b.title);
       }
       if (a.status === 'want') return a.title.localeCompare(b.title);
+      if (ga === 3) return a.title.localeCompare(b.title); // picks A-Z
       if (a.status === 'watched') return (b.rating||0) - (a.rating||0);
       return 0;
     });
@@ -8179,12 +8200,27 @@ function renderLibrary() {
 
   const showHeaders = fSort === 'smart' && !fS;
   const groupLabels = {watching:'Watching', upcoming:'Upcoming', want:'Want to Watch', watched:'Watched', dnf:"Didn't Finish"};
+  const getSmartGroupKey = (item) => {
+    if (item.status === 'watching')  return 'watching';
+    if (item.status === 'upcoming')  return 'upcoming';
+    if (item.status === 'want')      return 'want';
+    if (item.isShanePick || item.isLeighPick) return 'pick';
+    if (item.status === 'watched')   return 'watched';
+    if (item.status === 'dnf')       return 'dnf';
+    return item.status;
+  };
+  const allGroupLabels = {watching:'Watching', upcoming:'Upcoming', want:'Want to Watch', pick:'🏆 Pick of the Month', watched:'Watched', dnf:"Didn't Finish"};
   let lastGroup = null;
   el.innerHTML = list.map(item => {
     let header = '';
-    if (showHeaders && item.status !== lastGroup) {
-      lastGroup = item.status;
-      header = `<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);padding:14px 2px 6px;margin-top:2px;border-top:1px solid var(--border);">${groupLabels[item.status]||item.status}</div>`;
+    if (showHeaders) {
+      const groupKey = getSmartGroupKey(item);
+      if (groupKey !== lastGroup) {
+        lastGroup = groupKey;
+        const groupLabel = allGroupLabels[groupKey] || groupKey;
+        const isPick = groupKey === 'pick';
+        header = `<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:${isPick?'#c8a96e':'var(--accent)'};padding:14px 2px 6px;margin-top:2px;border-top:1px solid ${isPick?'rgba(200,169,110,0.3)':'var(--border)'};">${groupLabel}</div>`;
+      }
     }
     const rel = item.releaseDate ? fmtDate(item.releaseDate) : null;
     const isSoon = rel && (rel.cls==='soon'||rel.cls==='today');
@@ -8212,7 +8248,8 @@ function renderLibrary() {
     const seasonInfo = item.type==='show' ? buildSeasonInfo(item, isGuest) : '';
 
     const cardDetail = buildCardDetail(item);
-    const card = `<div class="item-card${isSoon?' soon':''}${isDisliked?' disliked':''}" id="card-${item.id}" data-status="${item.status}" onclick="toggleCard(${item.id}, event)">
+    const isPick = item.isShanePick || item.isLeighPick;
+    const card = `<div class="item-card${isSoon?' soon':''}${isDisliked?' disliked':''}${isPick?' is-pick':''}" id="card-${item.id}" data-status="${item.status}" onclick="toggleCard(${item.id}, event)">
       <div class="item-info" style="flex:1;min-width:0;">
         <div class="item-title">${esc(item.title)}</div>
         <div class="item-meta">
