@@ -281,6 +281,11 @@
     border-radius: var(--radius);
     padding: 10px 14px;
     font-size: 13px;
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .dupe-item.deleting {
+    opacity: 0;
+    transform: translateX(20px);
   }
   .dupe-item-title { font-weight: 500; color: var(--accent); margin-bottom: 4px; }
   .dupe-item-copies { color: var(--text2); font-size: 12px; }
@@ -8719,6 +8724,36 @@ function checkDuplicate() {
   }
 }
 
+async function deleteDupe(id, btn) {
+  const item = items.find(i => i.id===id);
+  if (!item) return;
+  // Find the dupe-item card containing this button
+  const card = btn.closest('.dupe-item');
+  if (card) {
+    // Show ✓ Deleted feedback
+    btn.textContent = '✓ Deleted';
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color = 'var(--green)';
+    btn.disabled = true;
+    // Fade out the card
+    setTimeout(() => {
+      card.classList.add('deleting');
+      setTimeout(() => {
+        card.remove();
+        // If no more dupe items in this group, remove the whole group
+        const result = document.getElementById('dupe-scan-results');
+        if (result && result.querySelectorAll('.dupe-item').length === 0) {
+          result.innerHTML = '<div style="font-size:13px;color:var(--green);padding:8px 4px;">✓ All duplicates resolved!</div>';
+          setTimeout(() => { result.innerHTML = ''; }, 2500);
+        }
+      }, 400);
+    }, 600);
+  }
+  // Actually delete from Supabase
+  items = items.filter(i => i.id!==id);
+  await removeItem(id);
+}
+
 function scanDuplicates() {
   const el = document.getElementById('dupe-scan-results');
   if (!el) return;
@@ -8746,7 +8781,7 @@ function scanDuplicates() {
         <div class="dupe-item">
           <div class="dupe-item-title">${esc(group[0].title)}</div>
           <div class="dupe-item-copies">${group.map(i =>
-            `<span style="margin-right:10px;">${statusLabels[i.status]||i.status}${i.service?' · '+i.service:''} <button onclick="deleteItem(${i.id})" style="font-size:11px;background:none;border:1px solid var(--red);border-radius:4px;color:var(--red);padding:1px 6px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:4px;">Delete</button></span>`
+            `<span style="margin-right:10px;">${statusLabels[i.status]||i.status}${i.service?' · '+i.service:''} <button onclick="deleteDupe(${i.id}, this)" style="font-size:11px;background:none;border:1px solid var(--red);border-radius:4px;color:var(--red);padding:1px 6px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:4px;">Delete</button></span>`
           ).join('')}</div>
         </div>`).join('')}
     </div>
