@@ -9832,6 +9832,12 @@ Yea, no">S1</span>
       </div>
 
       
+      <div class="form-row">
+        <div class="form-group">
+          <label>Release / Premiere Date</label>
+          <input type="date" id="a-release">
+        </div>
+      </div>
       <div class="form-group full">
         <label>Recommended By</label>
         <input type="text" id="a-notes" placeholder="Who recommended this? (optional)">
@@ -10801,8 +10807,6 @@ function buildEditPanel(item, isGuest) {
     <div class="edit-row">
       <label>Status</label>
       <select id="es-${item.id}" onchange="onEditStatusChange(${item.id})">${statusOpts}</select>
-      <label>Release Date</label>
-      <input type="date" id="ed-${item.id}" value="${item.releaseDate||''}" />
     </div>
     ${item.type==='movie' ? `<div class="edit-row">
       <label>Theaters</label>
@@ -10915,7 +10919,7 @@ async function saveEdit(id) {
   if (!item) return;
   item.title      = document.getElementById('et-'+id).value.trim() || item.title;
   item.status     = document.getElementById('es-'+id).value;
-  item.releaseDate = document.getElementById('ed-'+id).value || null;
+  // release date set on add, not edit
   item.service    = document.getElementById('esvc-'+id).value;
   if (item.type==='movie') {
     item.theaters = document.getElementById('eth-'+id)?.checked || false;
