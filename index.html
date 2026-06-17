@@ -242,6 +242,17 @@
   /* WATCHING badge */
   .b-watching { background: #2a1e35; color: #c090e0; }
 
+  /* CHARACTER COUNTER */
+  .char-counter {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: right;
+    margin-top: 3px;
+    transition: color 0.15s;
+  }
+  .char-counter.warn  { color: #c8772a; }
+  .char-counter.limit { color: var(--red, #c45c4a); font-weight: 600; }
+
   /* DUPLICATE WARNING */
   .dupe-warning {
     font-size: 12px;
@@ -639,13 +650,6 @@
   .countdown.today { background: #1e2e1a; color: #78a868; border-color: #3a5a30; }
 
   /* SHARE */
-  .share-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 1.25rem;
-  }
   .share-controls select {
     font-size: 13px;
     font-family: 'DM Sans', sans-serif;
@@ -865,7 +869,7 @@
         <input type="checkbox" id="srdnf-1781653118822-1" onchange="toggleSeasonDNF(1781653118822,1)" style="width:auto;flex:none;cursor:pointer;">
         Didn't finish this season
       </label>
-      <textarea class="season-rate-notes" id="srn-1781653118822-1" placeholder="Notes for this season…"></textarea>
+      <textarea class="season-rate-notes" id="srn-1781653118822-1" placeholder="Notes for this season…" maxlength="280" oninput="charCounter(this,280)"></textarea>
       <div style="display:flex;gap:8px;">
         <button class="season-edit-save" onclick="saveSeasonRating(1781653118822,1)">Save</button>
         <button class="season-edit-cancel" onclick="closeSeasonRatePanel(1781653118822,1)">Cancel</button>
@@ -878,7 +882,7 @@
         <div class="watch-stars" id="ws-1781653118822">
           <span class="watch-star" id="wstar-1781653118822-1" onclick="setWatchRating(1781653118822,1)">★</span><span class="watch-star" id="wstar-1781653118822-2" onclick="setWatchRating(1781653118822,2)">★</span><span class="watch-star" id="wstar-1781653118822-3" onclick="setWatchRating(1781653118822,3)">★</span><span class="watch-star" id="wstar-1781653118822-4" onclick="setWatchRating(1781653118822,4)">★</span><span class="watch-star" id="wstar-1781653118822-5" onclick="setWatchRating(1781653118822,5)">★</span>
         </div>
-        <textarea class="watch-notes" id="wn-1781653118822" placeholder="Add a review or notes (optional)…"></textarea>
+        <textarea class="watch-notes" id="wn-1781653118822" placeholder="Add a review or notes (optional)…" maxlength="500" oninput="charCounter(this,500)"></textarea>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-confirm" onclick="confirmWatched(1781653118822)">Confirm</button>
           <button class="btn-confirm" style="background:var(--red);color:#fff;" onclick="confirmDNF(1781653118822)">Didn't Finish</button>
@@ -2650,7 +2654,7 @@ Great storyline and acting">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-16"></textarea>
+      <textarea id="en-16" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(16)">Save</button>
@@ -2740,7 +2744,7 @@ Perfect mix of funny and scary">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-17"></textarea>
+      <textarea id="en-17" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(17)">Save</button>
@@ -2830,7 +2834,7 @@ Excellent premise!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-19"></textarea>
+      <textarea id="en-19" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(19)">Save</button>
@@ -2920,7 +2924,7 @@ Beautiful, sexy and smart">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-28"></textarea>
+      <textarea id="en-28" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(28)">Save</button>
@@ -3010,7 +3014,7 @@ Beautiful, sexy and smart">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-30"></textarea>
+      <textarea id="en-30" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(30)">Save</button>
@@ -3100,7 +3104,7 @@ Most original!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-31"></textarea>
+      <textarea id="en-31" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(31)">Save</button>
@@ -3190,7 +3194,7 @@ Stressfull and spectacular">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-34"></textarea>
+      <textarea id="en-34" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(34)">Save</button>
@@ -3297,7 +3301,7 @@ Watch Rogue 1 then this!">S2</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-38"></textarea>
+      <textarea id="en-38" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(38)">Save</button>
@@ -3387,7 +3391,7 @@ Dubbed &amp; still fantastic">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-39"></textarea>
+      <textarea id="en-39" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(39)">Save</button>
@@ -3494,7 +3498,7 @@ Still really good">S2</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-44"></textarea>
+      <textarea id="en-44" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(44)">Save</button>
@@ -3584,7 +3588,7 @@ Must watch">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-45"></textarea>
+      <textarea id="en-45" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(45)">Save</button>
@@ -3691,7 +3695,7 @@ Now the curtain opens">S2</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-46"></textarea>
+      <textarea id="en-46" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(46)">Save</button>
@@ -3798,7 +3802,7 @@ Great storyline continues">S2</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-47"></textarea>
+      <textarea id="en-47" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(47)">Save</button>
@@ -3851,7 +3855,7 @@ Great storyline continues">S2</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-80">A wonderful tribute to Johnny Toronto!</textarea>
+      <textarea id="en-80" maxlength="500" oninput="charCounter(this,500)">A wonderful tribute to Johnny Toronto!</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(80)">Save</button>
@@ -3960,7 +3964,7 @@ Watch Rogue 1 first, then this!">S2</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-1781652762254"></textarea>
+      <textarea id="en-1781652762254" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(1781652762254)">Save</button>
@@ -4069,7 +4073,7 @@ Still as good as Walking Dead">S2</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-1781652903821"></textarea>
+      <textarea id="en-1781652903821" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(1781652903821)">Save</button>
@@ -4195,7 +4199,7 @@ Out of control. Still good, but got a little " jesus'y""="">S3</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-20"></textarea>
+      <textarea id="en-20" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(20)">Save</button>
@@ -4316,7 +4320,7 @@ Out of control. Still good, but got a little " jesus'y""="">S3</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-24"></textarea>
+      <textarea id="en-24" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(24)">Save</button>
@@ -4405,7 +4409,7 @@ Out of control. Still good, but got a little " jesus'y""="">S3</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-33"></textarea>
+      <textarea id="en-33" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(33)">Save</button>
@@ -4495,7 +4499,7 @@ WTAF??">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-35"></textarea>
+      <textarea id="en-35" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(35)">Save</button>
@@ -4616,7 +4620,7 @@ WTAF??">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-36"></textarea>
+      <textarea id="en-36" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(36)">Save</button>
@@ -4706,7 +4710,7 @@ This was really good!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-41"></textarea>
+      <textarea id="en-41" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(41)">Save</button>
@@ -4796,7 +4800,7 @@ Really good!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-43"></textarea>
+      <textarea id="en-43" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(43)">Save</button>
@@ -4917,7 +4921,7 @@ Really good!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-50"></textarea>
+      <textarea id="en-50" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(50)">Save</button>
@@ -4968,7 +4972,7 @@ Really good!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-64">Beautiful! Varang is awesome</textarea>
+      <textarea id="en-64" maxlength="500" oninput="charCounter(this,500)">Beautiful! Varang is awesome</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(64)">Save</button>
@@ -5021,7 +5025,7 @@ Really good!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-69">Great sci-fi, and pretty good execution</textarea>
+      <textarea id="en-69" maxlength="500" oninput="charCounter(this,500)">Great sci-fi, and pretty good execution</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(69)">Save</button>
@@ -5072,7 +5076,7 @@ Really good!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-75">Crazy ride</textarea>
+      <textarea id="en-75" maxlength="500" oninput="charCounter(this,500)">Crazy ride</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(75)">Save</button>
@@ -5125,7 +5129,7 @@ Really good!">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-81"></textarea>
+      <textarea id="en-81" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(81)">Save</button>
@@ -5215,7 +5219,7 @@ Great acting... Ok execution">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-3"></textarea>
+      <textarea id="en-3" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(3)">Save</button>
@@ -5305,7 +5309,7 @@ Weird. Good, but weird">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-21"></textarea>
+      <textarea id="en-21" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(21)">Save</button>
@@ -5395,7 +5399,7 @@ It wants to be good... meh">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-29"></textarea>
+      <textarea id="en-29" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(29)">Save</button>
@@ -5482,7 +5486,7 @@ It wants to be good... meh">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-32"></textarea>
+      <textarea id="en-32" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(32)">Save</button>
@@ -5569,7 +5573,7 @@ It wants to be good... meh">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-37"></textarea>
+      <textarea id="en-37" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(37)">Save</button>
@@ -5659,7 +5663,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-48"></textarea>
+      <textarea id="en-48" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(48)">Save</button>
@@ -5710,7 +5714,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-65">Good, but not really our style</textarea>
+      <textarea id="en-65" maxlength="500" oninput="charCounter(this,500)">Good, but not really our style</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(65)">Save</button>
@@ -5761,7 +5765,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-66"></textarea>
+      <textarea id="en-66" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(66)">Save</button>
@@ -5812,7 +5816,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-67"></textarea>
+      <textarea id="en-67" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(67)">Save</button>
@@ -5863,7 +5867,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-74"></textarea>
+      <textarea id="en-74" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(74)">Save</button>
@@ -5914,7 +5918,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-76"></textarea>
+      <textarea id="en-76" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(76)">Save</button>
@@ -5965,7 +5969,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-77"></textarea>
+      <textarea id="en-77" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(77)">Save</button>
@@ -6016,7 +6020,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-78"></textarea>
+      <textarea id="en-78" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(78)">Save</button>
@@ -6069,7 +6073,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-82"></textarea>
+      <textarea id="en-82" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(82)">Save</button>
@@ -6120,7 +6124,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-83"></textarea>
+      <textarea id="en-83" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(83)">Save</button>
@@ -6171,7 +6175,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-84"></textarea>
+      <textarea id="en-84" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(84)">Save</button>
@@ -6222,7 +6226,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-85"></textarea>
+      <textarea id="en-85" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(85)">Save</button>
@@ -6273,7 +6277,7 @@ Great story. Seemed a little forced">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-86"></textarea>
+      <textarea id="en-86" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(86)">Save</button>
@@ -6363,7 +6367,7 @@ too much long winded convos">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-49"></textarea>
+      <textarea id="en-49" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(49)">Save</button>
@@ -6416,7 +6420,7 @@ too much long winded convos">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-68">I really wanted this to be amazing... let down</textarea>
+      <textarea id="en-68" maxlength="500" oninput="charCounter(this,500)">I really wanted this to be amazing... let down</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(68)">Save</button>
@@ -6467,7 +6471,7 @@ too much long winded convos">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-70">sigh....</textarea>
+      <textarea id="en-70" maxlength="500" oninput="charCounter(this,500)">sigh....</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(70)">Save</button>
@@ -6520,7 +6524,7 @@ too much long winded convos">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-71">Leigh's Favorite Movie</textarea>
+      <textarea id="en-71" maxlength="500" oninput="charCounter(this,500)">Leigh's Favorite Movie</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(71)">Save</button>
@@ -6571,7 +6575,7 @@ too much long winded convos">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-79">Started off great.. Ending was weird af</textarea>
+      <textarea id="en-79" maxlength="500" oninput="charCounter(this,500)">Started off great.. Ending was weird af</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(79)">Save</button>
@@ -6661,7 +6665,7 @@ Took a great franchise and made it way too singular">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-1781653751025"></textarea>
+      <textarea id="en-1781653751025" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(1781653751025)">Save</button>
@@ -6748,7 +6752,7 @@ Took a great franchise and made it way too singular">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-22"></textarea>
+      <textarea id="en-22" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(22)">Save</button>
@@ -6835,7 +6839,7 @@ Took a great franchise and made it way too singular">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-23"></textarea>
+      <textarea id="en-23" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(23)">Save</button>
@@ -6922,7 +6926,7 @@ Took a great franchise and made it way too singular">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-25"></textarea>
+      <textarea id="en-25" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(25)">Save</button>
@@ -7012,7 +7016,7 @@ Couldn&#39;t get into this one">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-26"></textarea>
+      <textarea id="en-26" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(26)">Save</button>
@@ -7099,7 +7103,7 @@ Couldn&#39;t get into this one">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-40"></textarea>
+      <textarea id="en-40" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(40)">Save</button>
@@ -7188,7 +7192,7 @@ Couldn&#39;t get into this one">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-42"></textarea>
+      <textarea id="en-42" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(42)">Save</button>
@@ -7239,7 +7243,7 @@ Couldn&#39;t get into this one">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-52"></textarea>
+      <textarea id="en-52" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(52)">Save</button>
@@ -7290,7 +7294,7 @@ Couldn&#39;t get into this one">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-72"></textarea>
+      <textarea id="en-72" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(72)">Save</button>
@@ -7393,7 +7397,7 @@ Couldn&#39;t get into this one">S1</span>
     </div>
     <div class="edit-row" style="flex-direction:column;align-items:stretch;">
       <label>Notes / Review</label>
-      <textarea id="en-1781663006281"></textarea>
+      <textarea id="en-1781663006281" maxlength="500" oninput="charCounter(this,500)"></textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(1781663006281)">Save</button>
@@ -8622,7 +8626,7 @@ function buildEditPanel(item) {
     </div>` : ''}
     <div id="ednf-${item.id}" style="display:${item.status==='dnf'?'flex':'none'};flex-direction:column;gap:5px;margin-top:4px;">
       <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Why didn't you finish it?</label>
-      <textarea id="en-dnf-${item.id}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:none;min-height:60px;" placeholder="Add a note about why you stopped…">${esc(item.notes||'')}</textarea>
+      <textarea id="en-dnf-${item.id}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:none;min-height:60px;" placeholder="Add a note about why you stopped…" maxlength="280" oninput="charCounter(this,280)">${esc(item.notes||'')}</textarea>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="edit-save" onclick="saveEdit(${item.id})">Save</button>
@@ -8706,6 +8710,24 @@ function onTypeChange() {
 }
 
 function onStatusChange() {}
+
+// ── CHARACTER COUNTER ─────────────────────────────────────────────────────────
+function charCounter(el, max) {
+  const count = el.value.length;
+  const remaining = max - count;
+  let counter = el.nextElementSibling;
+  if (!counter || !counter.classList.contains('char-counter')) {
+    counter = document.createElement('div');
+    counter.className = 'char-counter';
+    el.parentNode.insertBefore(counter, el.nextSibling);
+  }
+  counter.textContent = `${count} / ${max}`;
+  counter.classList.remove('warn','limit');
+  if (remaining <= 0) counter.classList.add('limit');
+  else if (remaining <= 50) counter.classList.add('warn');
+  // Enforce limit
+  if (count > max) el.value = el.value.substring(0, max);
+}
 
 // ── DUPLICATE DETECTION ───────────────────────────────────────────────────────
 function checkDuplicate() {
@@ -8837,6 +8859,5 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 </script>
-
 
 </body></html>
