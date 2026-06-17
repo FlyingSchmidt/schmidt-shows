@@ -253,7 +253,7 @@
   .char-counter.warn  { color: #c8772a; }
   .char-counter.limit { color: var(--red, #c45c4a); font-weight: 600; }
 
-  /* PICK OF THE MONTH */
+  /* Picks of the Month */
   @keyframes pickShimmer {
     0%   { border-left-color: rgba(200,169,110,0.25); }
     50%  { border-left-color: rgba(200,169,110,1); }
@@ -8147,12 +8147,12 @@ function renderLibrary() {
 
   // Sort
   if (fSort === 'smart') {
-    // Pick of the Month gets its own group (order 3 = after want, before watched)
+    // Picks of the Month gets its own group (order 3 = after want, before watched)
     const smartGroup = (item) => {
       if (item.status === 'watching')  return 0;
       if (item.status === 'upcoming')  return 1;
       if (item.status === 'want')      return 2;
-      if (item.isShanePick || item.isLeighPick) return 3; // pick of the month
+      if (item.isShanePick || item.isLeighPick) return 3; // Picks of the Month
       if (item.status === 'watched')   return 4;
       if (item.status === 'dnf')       return 5;
       return 9;
@@ -8209,7 +8209,7 @@ function renderLibrary() {
     if (item.status === 'dnf')       return 'dnf';
     return item.status;
   };
-  const allGroupLabels = {watching:'Watching', upcoming:'Upcoming', want:'Want to Watch', pick:'🏆 Pick of the Month', watched:'Watched', dnf:"Didn't Finish"};
+  const allGroupLabels = {watching:'Watching', upcoming:'Upcoming', want:'Want to Watch', pick:'🏆 Picks of the Month', watched:'Watched', dnf:"Didn't Finish"};
   let lastGroup = null;
   el.innerHTML = list.map(item => {
     let header = '';
@@ -8742,7 +8742,7 @@ function buildEditPanel(item, isGuest) {
       <textarea id="en-dnf-${item.id}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:none;min-height:60px;" placeholder="Add a note about why you stopped…" maxlength="280" oninput="charCounter(this,280)">${esc(item.notes||'')}</textarea>
     </div>
     <div class="pick-month-section" style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px;">
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:6px;">Pick of the Month</div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:6px;">Picks of the Month</div>
       <div style="display:flex;gap:8px;">
         <button onclick="setPickOfMonth('shane',${item.id})" style="flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid ${item.isShanePick?'#c8a96e':'var(--border2)'};background:${item.isShanePick?'rgba(200,169,110,0.12)':'none'};color:${item.isShanePick?'#c8a96e':'var(--text2)'};cursor:pointer;">
           🏆 ${item.isShanePick?'✓ Shane\'s Pick':'Shane\'s Pick'}
@@ -8871,7 +8871,7 @@ function initCharCounter(el, max) {
   else if (max - count <= 50) counter.classList.add('warn');
 }
 
-// ── PICK OF THE MONTH ────────────────────────────────────────────────────────
+// ── Picks of the Month ────────────────────────────────────────────────────────
 // Stored in Supabase as a special meta row, or we use a simple localStorage-like
 // approach storing pick IDs in the items themselves via a 'picks' field
 // Simpler: store pick IDs in two JS vars, persisted via a dedicated Supabase row
@@ -8899,8 +8899,8 @@ async function setPickOfMonth(person, itemId) {
 
 function buildPickRibbons(item) {
   let ribbons = '';
-  if (item.isShanePick)  ribbons += `<span class="pick-ribbon"><i class="ti ti-award" aria-hidden="true"></i>Shane's Pick of the Month</span>`;
-  if (item.isLeighPick) ribbons += `<span class="pick-ribbon"><i class="ti ti-award" aria-hidden="true"></i>Leigh's Pick of the Month</span>`;
+  if (item.isShanePick)  ribbons += `<span class="pick-ribbon"><i class="ti ti-award" aria-hidden="true"></i>Shane's Picks of the Month</span>`;
+  if (item.isLeighPick) ribbons += `<span class="pick-ribbon"><i class="ti ti-award" aria-hidden="true"></i>Leigh's Picks of the Month</span>`;
   if (!ribbons) return '';
   return `<div class="pick-ribbons">${ribbons}</div>`;
 }
