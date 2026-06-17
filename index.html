@@ -253,6 +253,23 @@
   .char-counter.warn  { color: #c8772a; }
   .char-counter.limit { color: var(--red, #c45c4a); font-weight: 600; }
 
+  /* PICK OF THE MONTH */
+  .pick-ribbon {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px 3px 6px;
+    border-radius: 4px 99px 99px 4px;
+    background: rgba(200,169,110,0.1);
+    border-left: 3px solid #c8a96e;
+    font-size: 11px;
+    font-weight: 600;
+    color: #c8a96e;
+    letter-spacing: 0.04em;
+  }
+  .pick-ribbon i { font-size: 14px; }
+  .pick-ribbons { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+
   /* EXPANDABLE CARD DETAIL */
   .item-card { cursor: pointer; }
   .item-card .card-actions { cursor: default; }
@@ -7860,6 +7877,8 @@ function itemToDb(item) {
     next_season_date: item.nextSeasonDate || null,
     season_ratings:   item.seasonRatings ? JSON.stringify(item.seasonRatings) : '{}',
     season_notes:     item.seasonNotes   ? JSON.stringify(item.seasonNotes)   : '{}',
+    is_shanes_pick:   item.isShanePick || false,
+    is_leighs_pick:   item.isLeighPick || false,
   };
 }
 
@@ -7880,6 +7899,8 @@ function dbToItem(row) {
     nextSeasonDate: row.next_season_date || null,
     seasonRatings:  row.season_ratings  ? JSON.parse(row.season_ratings)  : {},
     seasonNotes:    row.season_notes    ? JSON.parse(row.season_notes)    : {},
+    isShanePick:    row.is_shanes_pick  || false,
+    isLeighPick:    row.is_leighs_pick  || false,
   };
 }
 
@@ -7987,6 +8008,7 @@ function toggleCard(id, event) {
 function buildCardDetail(item) {
   const statusLabels = {watched:'Watched', want:'Want to watch', upcoming:'Upcoming', watching:'Watching', dnf:"Didn't Finish"};
   const ratingStr = item.rating > 1 ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : null;
+  const pickRibbons = buildPickRibbons(item);
   const where = [item.theaters?'🎬 Theaters':'', item.service?'📺 '+item.service:''].filter(Boolean).join(' + ');
   const rel = item.releaseDate ? fmtDate(item.releaseDate) : null;
   const watched = item.seasonsWatched || [];
@@ -8041,7 +8063,9 @@ function buildCardDetail(item) {
 
   if (!sections) return '';
 
+  if (!sections && !pickRibbons) return '';
   return `<div class="card-detail" id="cd-${item.id}">
+    ${pickRibbons}
     ${sections}
   </div>`;
 }
@@ -8676,7 +8700,19 @@ function buildEditPanel(item) {
       <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Why didn't you finish it?</label>
       <textarea id="en-dnf-${item.id}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:none;min-height:60px;" placeholder="Add a note about why you stopped…" maxlength="280" oninput="charCounter(this,280)">${esc(item.notes||'')}</textarea>
     </div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
+    ${!isGuest ? `
+    <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px;">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:6px;">Pick of the Month</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="setPickOfMonth('shane',${item.id})" style="flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid ${item.isShanePick?'#c8a96e':'var(--border2)'};background:${item.isShanePick?'rgba(200,169,110,0.12)':'none'};color:${item.isShanePick?'#c8a96e':'var(--text2)'};cursor:pointer;font-weight:${item.isShanePick?'600':'400'};">
+          🏆 ${item.isShanePick?'✓ Shane\'s Pick':'Shane\'s Pick'}
+        </button>
+        <button onclick="setPickOfMonth('leigh',${item.id})" style="flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid ${item.isLeighPick?'#c8a96e':'var(--border2)'};background:${item.isLeighPick?'rgba(200,169,110,0.12)':'none'};color:${item.isLeighPick?'#c8a96e':'var(--text2)'};cursor:pointer;font-weight:${item.isLeighPick?'600':'400'};">
+          🏆 ${item.isLeighPick?'✓ Leigh\'s Pick':'Leigh\'s Pick'}
+        </button>
+      </div>
+    </div>` : ''}
+    <div style="display:flex;gap:8px;margin-top:8px;">
       <button class="edit-save" onclick="saveEdit(${item.id})">Save</button>
       <button class="edit-cancel" onclick="closeEditPanel(${item.id})">Cancel</button>
     </div>
@@ -8793,6 +8829,40 @@ function initCharCounter(el, max) {
   counter.classList.remove('warn','limit');
   if (count >= max) counter.classList.add('limit');
   else if (max - count <= 50) counter.classList.add('warn');
+}
+
+// ── PICK OF THE MONTH ────────────────────────────────────────────────────────
+// Stored in Supabase as a special meta row, or we use a simple localStorage-like
+// approach storing pick IDs in the items themselves via a 'picks' field
+// Simpler: store pick IDs in two JS vars, persisted via a dedicated Supabase row
+// Easiest: add shanesPickId / leighsPickId fields to each item — only the picked
+// item has it set to true, all others false. We'll use a global state approach:
+// store pick item IDs in Supabase as part of item data with fields is_shanes_pick / is_leighs_pick
+
+async function setPickOfMonth(person, itemId) {
+  // Remove previous pick for this person
+  const prevPick = items.find(i => person === 'shane' ? i.isShanePick : i.isLeighPick);
+  if (prevPick && prevPick.id !== itemId) {
+    if (person === 'shane') prevPick.isShanePick = false;
+    else prevPick.isLeighPick = false;
+    await upsertItem(prevPick);
+  }
+  // Set new pick
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+  // Toggle off if already picked
+  if (person === 'shane') item.isShanePick = !item.isShanePick;
+  else item.isLeighPick = !item.isLeighPick;
+  await upsertItem(item);
+  renderLibrary();
+}
+
+function buildPickRibbons(item) {
+  let ribbons = '';
+  if (item.isShanePick)  ribbons += `<span class="pick-ribbon"><i class="ti ti-award" aria-hidden="true"></i>Shane's Pick of the Month</span>`;
+  if (item.isLeighPick) ribbons += `<span class="pick-ribbon"><i class="ti ti-award" aria-hidden="true"></i>Leigh's Pick of the Month</span>`;
+  if (!ribbons) return '';
+  return `<div class="pick-ribbons">${ribbons}</div>`;
 }
 
 // ── DUPLICATE DETECTION ───────────────────────────────────────────────────────
