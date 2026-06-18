@@ -264,6 +264,67 @@
     animation: pickShimmer 2.5s ease-in-out infinite;
   }
 
+  /* CURRENT FAVORITES BOX */
+  .fav-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px 8px;
+    border: 1px solid rgba(200,169,110,0.35);
+    border-radius: 8px;
+    background: rgba(200,169,110,0.06);
+  }
+  .fav-box-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(200,169,110,0.6);
+    font-family: 'Cinzel', serif;
+    white-space: nowrap;
+  }
+  .fav-box-btns { display: flex; gap: 6px; }
+  .fav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    border: 1px solid rgba(200,169,110,0.3);
+    background: none;
+    color: #c8a96e;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+  }
+  .fav-btn:hover { background: rgba(200,169,110,0.12); border-color: rgba(200,169,110,0.6); }
+  .fav-popup {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1408;
+    border: 1px solid rgba(200,169,110,0.4);
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 180px;
+    max-width: 240px;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    pointer-events: none;
+    text-align: left;
+  }
+  .fav-popup.visible { display: block; }
+  .fav-popup-title { font-size: 13px; font-weight: 500; color: #f0ece4; margin-bottom: 4px; line-height: 1.3; }
+  .fav-popup-stars { color: #c8a96e; font-size: 13px; letter-spacing: 1px; }
+  .fav-popup-meta { font-size: 11px; color: rgba(200,169,110,0.5); margin-top: 3px; }
+  .fav-popup-tap { font-size: 10px; color: rgba(200,169,110,0.4); margin-top: 5px; font-style: italic; }
+
   .fav-ribbon {
     display: inline-flex;
     align-items: center;
@@ -11058,16 +11119,45 @@ function toggleWatchFav(person, id) {
   }
 }
 
+function favPopupHTML(item) {
+  if (!item) return '';
+  const stars = item.rating > 0 ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : '';
+  const statusLabels = {watched:'Watched',watching:'Watching',want:'Want to Watch',upcoming:'Upcoming',dnf:"Didn't Finish"};
+  const meta = [statusLabels[item.status]||item.status, item.service||''].filter(Boolean).join(' · ');
+  return '<div class="fav-popup" id="fp-' + item.id + '">'
+    + '<div class="fav-popup-title">' + item.title + '</div>'
+    + (stars ? '<div class="fav-popup-stars">' + stars + '</div>' : '')
+    + '<div class="fav-popup-meta">' + meta + '</div>'
+    + '<div class="fav-popup-tap">Tap to go to card</div>'
+    + '</div>';
+}
+
+function showFavPopup(itemId) {
+  document.querySelectorAll('.fav-popup').forEach(function(p) { p.classList.remove('visible'); });
+  const popup = document.getElementById('fp-' + itemId);
+  if (popup) popup.classList.add('visible');
+}
+
+function hideFavPopups() {
+  document.querySelectorAll('.fav-popup').forEach(function(p) { p.classList.remove('visible'); });
+}
+
 function renderHeaderFavs() {
   const el = document.getElementById('header-favs');
   if (!el) return;
   const shaneFav = items.find(function(i) { return i.isShanesFav; });
   const leighFav = items.find(function(i) { return i.isLeighsFav; });
-  const bs = 'display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid rgba(200,169,110,0.35);background:rgba(200,169,110,0.08);cursor:pointer;font-size:11px;font-family:DM Sans,sans-serif;color:#c8a96e;white-space:nowrap;';
-  let out = '';
-  if (shaneFav) out += '<button style="' + bs + '" onclick="highlightCard(' + shaneFav.id + ')">🏆 Shane</button>';
-  if (leighFav) out += '<button style="' + bs + '" onclick="highlightCard(' + leighFav.id + ')">🏆 Leigh</button>';
-  el.innerHTML = out;
+  if (!shaneFav && !leighFav) { el.innerHTML = ''; return; }
+  const shaneBtn = shaneFav
+    ? '<button class="fav-btn" onclick="highlightCard(' + shaneFav.id + ')" onmouseenter="showFavPopup(' + shaneFav.id + ')" ontouchstart="showFavPopup(' + shaneFav.id + ')" onmouseleave="hideFavPopups()">🏆 Shane' + favPopupHTML(shaneFav) + '</button>'
+    : '';
+  const leighBtn = leighFav
+    ? '<button class="fav-btn" onclick="highlightCard(' + leighFav.id + ')" onmouseenter="showFavPopup(' + leighFav.id + ')" ontouchstart="showFavPopup(' + leighFav.id + ')" onmouseleave="hideFavPopups()">🏆 Leigh' + favPopupHTML(leighFav) + '</button>'
+    : '';
+  el.innerHTML = '<div class="fav-box">'
+    + '<div class="fav-box-label">Current Favorites</div>'
+    + '<div class="fav-box-btns">' + shaneBtn + leighBtn + '</div>'
+    + '</div>';
 }
 
 function highlightCard(id) {
