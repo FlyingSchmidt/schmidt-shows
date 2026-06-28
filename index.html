@@ -9823,7 +9823,6 @@ Yea, no">S1</span>
           <label>Status</label>
           <select id="a-status" onchange="onStatusChange()">
             <option value="want">Want to watch</option>
-            <option value="upcoming">Upcoming</option>
             <option value="watching">Watching</option>
             <option value="watched">Watched</option>
             <option value="dnf">Didn't Finish</option>
@@ -10606,7 +10605,13 @@ async function addItem() {
   } else {
     service = document.getElementById('a-service-show').value;
   }
-  const status = document.getElementById('a-status').value;
+  let status = document.getElementById('a-status').value;
+  // Auto-promote to Upcoming if Want to Watch has a future release date
+  const releaseVal = document.getElementById('a-release').value;
+  if (status === 'want' && releaseVal) {
+    const releaseDate = new Date(releaseVal + 'T00:00:00');
+    if (releaseDate > new Date()) status = 'upcoming';
+  }
   const newItem = {
     id: Date.now(),
     title, type, service, theaters, status,
