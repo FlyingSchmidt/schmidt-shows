@@ -10256,8 +10256,22 @@ function buildCardDetail(item) {
   </div>`;
 }
 
+function getNextUnwatchedSeason(item) {
+  if (!item.totalSeasons) return null;
+  const watched = item.seasonsWatched || [];
+  for (let s = 1; s <= item.totalSeasons; s++) {
+    if (!watched.includes(s)) return s;
+  }
+  return null;
+}
+
 function buildWatchedBtn(item) {
+  // Unrated watched items — movies use rate popup, shows use next season pill
   if (item.status === 'watched' && (!item.rating || item.rating === 0)) {
+    if (item.type === 'show') {
+      const next = getNextUnwatchedSeason(item);
+      if (next) return `<button class="btn-mark-watched" onclick="openSeasonRatePanel(${item.id},${next})">Rate it</button>`;
+    }
     return `<button class="btn-mark-watched" onclick="openWatchPanel(${item.id})">Rate it</button>`;
   }
   if (item.status === 'watched') return '';
@@ -10294,7 +10308,10 @@ function buildWatchedBtn(item) {
     return `<button class="btn-mark-watched" onclick="openSeasonRatePanel(${item.id},${nextSeason||1})">${label}</button>`;
   }
 
-  // No seasons logged yet
+  // No seasons logged yet — open first season pill
+  if (total > 0) {
+    return `<button class="btn-mark-watched" onclick="openSeasonRatePanel(${item.id},1)">Watched it?</button>`;
+  }
   return `<button class="btn-mark-watched" onclick="openWatchPanel(${item.id})">Watched it?</button>`;
 }
 
@@ -10936,12 +10953,12 @@ function buildEditPanel(item, isGuest) {
         </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
-          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Next Season #</label>
-          <input type="number" id="es-ns-${item.id}" value="${item.nextSeasonNum||1}" min="1" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);" />
+        <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:120px;">
+          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Current Season Release Date</label>
+          <input type="date" id="es-rd-${item.id}" value="${item.releaseDate||''}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);" />
         </div>
         <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:120px;">
-          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Release Date</label>
+          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Next Season Release Date</label>
           <input type="date" id="es-nd-${item.id}" value="${item.nextSeasonDate||''}" style="font-size:13px;font-family:'DM Sans',sans-serif;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);" />
         </div>
       </div>
@@ -11039,8 +11056,11 @@ async function saveEdit(id) {
       item.seasonsWatched = watched > 0 ? Array.from({length: watched}, (_,i) => i+1) : [];
     }
     if (epsEl)  item.epsPerSeason   = parseInt(epsEl.value)  || null;
-    if (nsEl)   item.nextSeasonNum  = parseInt(nsEl.value)   || null;
-    if (ndEl)   item.nextSeasonDate = ndEl.value             || null;
+    const rdEl  = document.getElementById('es-rd-'+id);
+    if (rdEl)   item.releaseDate    = rdEl.value  || null;
+    // Auto-calculate next season number from total seasons
+    if (item.totalSeasons) item.nextSeasonNum = item.totalSeasons + 1;
+    if (ndEl)   item.nextSeasonDate = ndEl.value || null;
     autoUpdateShowStatus(item);
   }
   await upsertItem(item);
